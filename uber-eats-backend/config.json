@@ -1,0 +1,10 @@
+{
+    "DB": {
+        "host": "ubews.com",
+        "username": "admin",
+        "password": "admin",
+        "port": 3306,
+        "database": ""
+    }
+
+}

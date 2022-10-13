@@ -1,0 +1,4 @@
+{
+    "mongoURI":
+      "mongodb+srv:///UberEats?retryWrites=true&w="
+  }

@@ -1,0 +1,329 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable arrow-body-style */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable react/destructuring-assignment */
+import React from 'react';
+// import ReactDOM from 'react-dom';
+import 'bootstrap/dist/css/bootstrap.css';
+import Axios from 'axios';
+import {
+  BrowserRouter as Router,
+  Link,
+  Route,
+  Switch,
+} from 'react-router-dom';
+import { Redirect } from 'react-router';
+import { connect } from 'react-redux';
+import styled from 'styled-components';
+import history from './history';
+// eslint-disable-next-line import/no-cycle
+import UserLogin from './index';
+import NavBar from '../../NavBar';
+
+const HeadText = styled.h2`
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.24;
+    color: ##000000;
+    float: left;
+    // z-index: 0;
+    // margin: 0;
+    //padding-left: 150px;
+`;
+const OverallText = styled.h2`
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.00;
+    color: ##000000;
+    float: left;
+    // z-index: 0;
+    // margin: 0;
+    //padding-left: 150px;
+`;
+
+class userReg extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: '',
+      contact: '',
+      email: '',
+      password: '',
+      // register: false,
+      // redirect: null,
+      usernameValid: '',
+      contactValid: '',
+      emailValid: '',
+      passwordValid: '',
+      emailDup: '',
+      usernameError: '',
+      contactError: '',
+      emailError: '',
+      passwordError: '',
+      emailDupError: '',
+    };
+    this.usernameInputHandler = this.usernameInputHandler.bind(this);
+    this.contactInputHandler = this.contactInputHandler.bind(this);
+    this.emailInputHandler = this.emailInputHandler.bind(this);
+    this.passwordInputHandler = this.passwordInputHandler.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  // componentDidMount() {
+  //   this.setState({
+  //     // eslint-disable-next-line react/no-unused-state
+  //     register: false,
+  //   });
+  // }
+
+  handleValidation() {
+    // console.log('validation');
+    const {
+      usernameValid,
+      contactValid,
+      emailValid,
+      passwordValid,
+      emailDup,
+    } = this.state;
+    const usernameError = usernameValid ? '' : 'Name cannot be empty.';
+    const contactError = contactValid ? '' : 'Contact is invalid';
+    const emailError = emailValid ? '' : 'Email is invalid';
+    const passwordError = passwordValid ? '' : 'Password cannot be blank.';
+    const emailDupError = emailDup ? '' : 'Email already exists.';
+    this.setState({
+      usernameError,
+      contactError,
+      emailError,
+      passwordError,
+      emailDupError,
+    });
+  }
+
+  usernameInputHandler = (event) => {
+    console.log(event.target.value);
+    const username = event.target.value;
+    if (username !== '') {
+      this.setState({
+        username,
+        usernameValid: true,
+      });
+    } else {
+      this.setState({
+        usernameValid: false,
+      });
+    }
+  }
+
+  contactInputHandler = (event) => {
+    console.log(event.target.value);
+    const contact = event.target.value;
+    const contactRegExp = new RegExp(/^[0-9\b]+$/);
+    if (contact !== '' && contactRegExp.test(contact) && contact.length === 10) {
+      this.setState({
+        contact,
+        contactValid: true,
+      });
+    } else {
+      this.setState({
+        contactValid: false,
+      });
+    }
+  }
+
+  emailInputHandler = (event) => {
+    console.log(event.target.value);
+    const email = event.target.value;
+    const emailRegExp = new RegExp('.+@.+\\..+');
+    if (email !== '' && emailRegExp.test(email)) {
+      this.setState({
+        email,
+        emailValid: true,
+      });
+    } else {
+      this.setState({
+        emailValid: false,
+      });
+    }
+  }
+
+  passwordInputHandler = (event) => {
+    console.log(event.target.value);
+    const password = event.target.value;
+    if (password !== '') {
+      this.setState({
+        password,
+        passwordValid: true,
+      });
+    } else {
+      this.setState({
+        passwordValid: false,
+      });
+    }
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    const {
+      username,
+      contact,
+      email,
+      password,
+    } = this.state;
+    console.log(username, contact, email, password);
+    Axios.post('http://localhost:3001/userReg', {
+      username,
+      contact,
+      email,
+      password,
+    }).then((response) => {
+      console.log('Status Code : ', response.data.status);
+      console.log(response);
+      const status = response.data.status;
+      if (status === 1062) {
+        this.setState({
+          // redirect: false,
+          emailDup: true,
+        });
+      } else {
+        this.setState({
+          // redirect: true,
+          emailDup: false,
+        });
+        this.props.dispatch({
+          type: 'USER_REGISTERED',
+          payload: true,
+        });
+      }
+
+      // props.history.push('/login');
+      // <Redirect to='/login'/>
+    }); this.handleValidation();
+  }
+
+  render() {
+    let redirectVar = null;
+    if (this.props.redirectUserReg) {
+      redirectVar = <Redirect to="/login" />;
+    }
+    const usernameError = this.state.usernameError;
+    const contactError = this.state.contactError;
+    const emailError = this.state.emailError;
+    const passwordError = this.state.passwordError;
+    const emailDupError = this.state.emailDupError;
+    return (
+      <div>
+        {redirectVar}
+        <NavBar />
+        <div className="container">
+          <form onSubmit={this.handleSubmit}>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <HeadText>
+                  Let&apos;s get started
+                  <br />
+                  <br />
+                </HeadText>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <OverallText>
+                  Enter your details(required).
+                  <br />
+                </OverallText>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <OverallText>
+                  <input type="text" name="username" placeholder=" Name " style={{ width: '390px', height: '35px' }} onChange={this.usernameInputHandler} required />
+                  <span style={{ color: 'red' }}>
+                    {usernameError}
+                  </span>
+                  <br />
+                </OverallText>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <OverallText>
+                  <input type="tel" name="contact" placeholder=" Contact Number " style={{ width: '390px', height: '35px' }} onChange={this.contactInputHandler} required />
+                  <span style={{ color: 'red' }}>
+                    {contactError}
+                  </span>
+                  <br />
+                </OverallText>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <OverallText>
+                  <input type="email" name="email" placeholder=" Email " style={{ width: '390px', height: '35px' }} onChange={this.emailInputHandler} required />
+                  <span style={{ color: 'red' }}>
+                    {emailError}
+                  </span>
+                  <span style={{ color: 'red' }}>
+                    {emailDupError}
+                  </span>
+                  <br />
+                </OverallText>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <OverallText>
+                  <input type="password" name="password" placeholder=" Password " style={{ width: '390px', height: '35px' }} onChange={this.passwordInputHandler} required />
+                  <span style={{ color: 'red' }}>
+                    {passwordError}
+                  </span>
+                  <br />
+                  <br />
+                </OverallText>
+              </div>
+            </div>
+            <div className="row">
+              <div className="col-xs" />
+              <div className="col-xs">
+                <OverallText>
+                  <input type="button" value="Register" style={{ width: '390px', height: '35px', backgroundColor: '#7bb420' }} onClick={this.handleSubmit} />
+                </OverallText>
+              </div>
+            </div>
+          </form>
+          <div className="row">
+            <div className="col-xs" />
+            <div className="col-xs">
+              <OverallText>
+                Already have an account?
+                <Router forceRefresh>
+                  <Link to="/login" onClick={() => history.push('/login')} style={{ color: 'green' }}> Login</Link>
+                  <Switch>
+                    <Route exact path="/login" component={UserLogin} />
+                  </Switch>
+                </Router>
+              </OverallText>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = (state) => {
+  return { redirectUserReg: state.redirectUserReg };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    dispatch,
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(userReg);
